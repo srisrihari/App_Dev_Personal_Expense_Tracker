@@ -15,19 +15,23 @@ class AddExpenseScreen extends StatefulWidget {
 
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _amountController = TextEditingController();
-  final _categoryController = TextEditingController();
-  DateTime _selectedDate = DateTime.now();
+  late TextEditingController _amountController;
+  late TextEditingController _categoryController;
+  late DateTime _selectedDate;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.expense != null) {
-      _amountController.text = widget.expense!.amount.toString();
-      _categoryController.text = widget.expense!.category;
-      _selectedDate = DateTime.parse(widget.expense!.date);
-    }
+    _amountController = TextEditingController(
+      text: widget.expense?.amount.toString() ?? '',
+    );
+    _categoryController = TextEditingController(
+      text: widget.expense?.category ?? '',
+    );
+    _selectedDate = widget.expense?.date != null 
+      ? DateTime.tryParse(widget.expense!.date) ?? DateTime.now()
+      : DateTime.now();
   }
 
   Future<void> _selectDate() async {
@@ -35,9 +39,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       context: context,
       initialDate: _selectedDate,
       firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      lastDate: DateTime(2025),
     );
-    if (picked != null && picked != _selectedDate) {
+    if (picked != null) {
       setState(() {
         _selectedDate = picked;
       });
@@ -49,13 +53,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       setState(() => _isLoading = true);
 
       try {
+        // Format the date in ISO format (YYYY-MM-DD)
+        final formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
+        
         final expense = Expense(
           id: widget.expense?.id,
           userId: '', // Leave empty, will be set by API service
           amount: double.parse(_amountController.text),
           category: _categoryController.text,
-          date: DateFormat('yyyy-MM-dd').format(_selectedDate),
+          date: formattedDate,
         );
+
+        print('Saving expense with date: $formattedDate');
 
         bool success;
         if (widget.expense != null) {
@@ -82,6 +91,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           }
         }
       } catch (e) {
+        print('Error saving expense: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

@@ -5,7 +5,11 @@ import '../models/user.dart';
 import '../models/expense.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:8000';
+  // Use 10.0.2.2 for Android emulator to connect to host machine's localhost
+  // For physical device, use your computer's local IP address
+  // For Linux desktop, use 127.0.0.1
+  static const String baseUrl = 'http://127.0.0.1:8000';
+  
   final storage = const FlutterSecureStorage();
 
   Future<String?> getToken() async {
@@ -47,6 +51,8 @@ class ApiService {
         },
       );
 
+      print('Login request: $baseUrl/token');
+      print('Login request body: username=$username');
       print('Login response: ${response.statusCode} ${response.body}');
 
       if (response.statusCode == 200) {
@@ -54,8 +60,11 @@ class ApiService {
         await saveToken(data['access_token']);
         await saveUserId(data['user_id']);
         return true;
+      } else {
+        print('Login failed: ${response.statusCode} - ${response.body}');
+        // You can add more specific error handling here
+        return false;
       }
-      return false;
     } catch (e) {
       print('Login error: $e');
       return false;
@@ -101,7 +110,11 @@ class ApiService {
 
   Future<bool> createExpense(Expense expense) async {
     try {
-      final headers = await _getHeaders();
+      final headers = {
+        ...await _getHeaders(),
+        'Accept': 'application/json',
+      };
+      
       final userId = await getUserId();
       if (userId == null) {
         print('User ID not found');
@@ -110,16 +123,35 @@ class ApiService {
 
       final expenseData = expense.toJson();
       expenseData['user_id'] = userId;
+      
+      // Format the date in ISO format
+      final DateTime date = DateTime.parse(expense.date);
+      expenseData['date'] = date.toIso8601String().split('T')[0];
 
       print('Creating expense with data: $expenseData');
+      final uri = Uri.parse('$baseUrl/expenses/');
+      print('Request URI: ${uri.toString()}');
 
       final response = await http.post(
-        Uri.parse('$baseUrl/expenses'),
+        uri,
         headers: headers,
         body: jsonEncode(expenseData),
       );
 
       print('Create expense response: ${response.statusCode} ${response.body}');
+      if (response.statusCode == 307) {
+        final redirectUrl = response.headers['location'];
+        print('Redirect URL: $redirectUrl');
+        if (redirectUrl != null) {
+          final redirectResponse = await http.post(
+            Uri.parse(redirectUrl),
+            headers: headers,
+            body: jsonEncode(expenseData),
+          );
+          print('Redirect response: ${redirectResponse.statusCode} ${redirectResponse.body}');
+          return redirectResponse.statusCode == 201 || redirectResponse.statusCode == 200;
+        }
+      }
       return response.statusCode == 201 || response.statusCode == 200;
     } catch (e) {
       print('Create expense error: $e');

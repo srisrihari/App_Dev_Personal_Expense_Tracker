@@ -13,23 +13,23 @@ class Expense {
     required this.date,
   });
 
-  factory Expense.fromJson(Map<String, dynamic> json) {
-    return Expense(
-      id: json['id'],
-      userId: json['user_id'],
-      amount: json['amount'].toDouble(),
-      category: json['category'],
-      date: json['date'],
-    );
-  }
-
   Map<String, dynamic> toJson() {
     return {
-      if (id != null) 'id': id,
+      'id': id,
       'user_id': userId,
       'amount': amount,
       'category': category,
       'date': date,
     };
+  }
+
+  factory Expense.fromJson(Map<String, dynamic> json) {
+    return Expense(
+      id: json['id']?.toString(),
+      userId: json['user_id']?.toString() ?? '',
+      amount: double.parse(json['amount'].toString()),
+      category: json['category'].toString(),
+      date: json['date'].toString(),
+    );
   }
 }
