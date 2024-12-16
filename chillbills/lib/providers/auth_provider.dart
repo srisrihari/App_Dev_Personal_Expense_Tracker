@@ -6,11 +6,13 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider with ChangeNotifier {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService;
   User? _currentUser;
   bool _isLoading = false;
   String? _token;
   bool _isAuthenticated = false;
+
+  AuthProvider(this._apiService);
 
   User? get currentUser => _currentUser;
   bool get isLoading => _isLoading;

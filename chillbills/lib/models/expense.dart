@@ -1,124 +1,182 @@
 import 'package:flutter/material.dart';
 
-enum ExpenseCategory {
-  food,
-  transportation,
-  entertainment,
-  shopping,
-  utilities,
-  health,
-  education,
-  other
+class ExpenseCategory {
+  static const String food = 'food';
+  static const String transportation = 'transportation';
+  static const String entertainment = 'entertainment';
+  static const String shopping = 'shopping';
+  static const String utilities = 'utilities';
+  static const String health = 'health';
+  static const String education = 'education';
+  static const String other = 'other';
+
+  static List<String> values = [
+    food,
+    transportation,
+    entertainment,
+    shopping,
+    utilities,
+    health,
+    education,
+    other,
+  ];
+
+  static Color getColorForCategory(String category) {
+    switch (category.toLowerCase()) {
+      case food:
+        return Colors.orange;
+      case transportation:
+        return Colors.blue;
+      case entertainment:
+        return Colors.purple;
+      case shopping:
+        return Colors.pink;
+      case utilities:
+        return Colors.teal;
+      case health:
+        return Colors.red;
+      case education:
+        return Colors.indigo;
+      case other:
+      default:
+        return Colors.grey;
+    }
+  }
+
+  static IconData getIconForCategory(String category) {
+    switch (category.toLowerCase()) {
+      case food:
+        return Icons.restaurant;
+      case transportation:
+        return Icons.directions_car;
+      case entertainment:
+        return Icons.movie;
+      case shopping:
+        return Icons.shopping_bag;
+      case utilities:
+        return Icons.build;
+      case health:
+        return Icons.health_and_safety;
+      case education:
+        return Icons.school;
+      case other:
+      default:
+        return Icons.category;
+    }
+  }
+
+  static String getDisplayName(String category) {
+    switch (category.toLowerCase()) {
+      case food:
+        return 'Food';
+      case transportation:
+        return 'Transportation';
+      case entertainment:
+        return 'Entertainment';
+      case shopping:
+        return 'Shopping';
+      case utilities:
+        return 'Utilities';
+      case health:
+        return 'Health';
+      case education:
+        return 'Education';
+      case other:
+      default:
+        return 'Other';
+    }
+  }
 }
 
 class Expense {
-  final String id;
-  final String userId;
+  final String? id;
+  final String title;  // Maps to description in backend
   final double amount;
-  final String description;
-  final ExpenseCategory category;
+  final String category;
   final DateTime date;
+  final String? userId;
 
   Expense({
-    required this.userId,
-    this.id = '',
+    this.id,
+    required this.title,
     required this.amount,
-    this.description = '',
     required this.category,
     required this.date,
+    this.userId,
   });
 
   factory Expense.fromJson(Map<String, dynamic> json) {
+    DateTime parseDate(dynamic value) {
+      if (value == null) return DateTime.now();
+      if (value is DateTime) return value;
+      if (value is String) {
+        try {
+          return DateTime.parse(value);
+        } catch (e) {
+          debugPrint('Error parsing date: $e');
+          return DateTime.now();
+        }
+      }
+      return DateTime.now();
+    }
+
+    String parseCategory(dynamic value) {
+      if (value == null) return ExpenseCategory.other;
+      final category = value.toString();
+      if (ExpenseCategory.values.contains(category)) {
+        return category;
+      }
+      debugPrint('Invalid category: $category, defaulting to other');
+      return ExpenseCategory.other;
+    }
+
     return Expense(
-      id: json['id'] ?? '',
-      userId: json['user_id'] ?? '',
-      amount: (json['amount'] is int) 
-        ? (json['amount'] as int).toDouble() 
-        : (json['amount'] as num).toDouble(),
-      description: json['description'] ?? '',
-      category: _categoryFromString(json['category'] ?? 'other'),
-      date: DateTime.parse(json['date']),
+      id: json['id']?.toString(),
+      title: json['description'] ?? json['title'] ?? 'Untitled Expense',
+      amount: (json['amount'] is int)
+          ? (json['amount'] as int).toDouble()
+          : ((json['amount'] as num?)?.toDouble() ?? 0.0),
+      category: parseCategory(json['category']),
+      date: parseDate(json['date']),
+      userId: json['user_id']?.toString(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'user_id': userId,
+      if (id != null) 'id': id,
+      'description': title,
       'amount': amount,
-      'description': description,
-      'category': category.toString().split('.').last,
+      'category': category,
       'date': date.toIso8601String(),
+      if (userId != null) 'user_id': userId,
     };
-  }
-
-  static ExpenseCategory _categoryFromString(String category) {
-    try {
-      return ExpenseCategory.values.firstWhere(
-        (e) => e.toString().split('.').last.toLowerCase() == category.toLowerCase()
-      );
-    } catch (e) {
-      return ExpenseCategory.other;
-    }
-  }
-
-  IconData get categoryIcon {
-    switch (category) {
-      case ExpenseCategory.food:
-        return Icons.restaurant;
-      case ExpenseCategory.transportation:
-        return Icons.directions_car;
-      case ExpenseCategory.entertainment:
-        return Icons.movie;
-      case ExpenseCategory.shopping:
-        return Icons.shopping_cart;
-      case ExpenseCategory.utilities:
-        return Icons.build;
-      case ExpenseCategory.health:
-        return Icons.local_hospital;
-      case ExpenseCategory.education:
-        return Icons.school;
-      case ExpenseCategory.other:
-        return Icons.category;
-    }
-  }
-
-  Color get categoryColor {
-    switch (category) {
-      case ExpenseCategory.food:
-        return Colors.orange;
-      case ExpenseCategory.transportation:
-        return Colors.blue;
-      case ExpenseCategory.entertainment:
-        return Colors.purple;
-      case ExpenseCategory.shopping:
-        return Colors.green;
-      case ExpenseCategory.utilities:
-        return Colors.brown;
-      case ExpenseCategory.health:
-        return Colors.red;
-      case ExpenseCategory.education:
-        return Colors.indigo;
-      case ExpenseCategory.other:
-        return Colors.grey;
-    }
   }
 
   Expense copyWith({
     String? id,
-    String? userId,
+    String? title,
     double? amount,
-    String? description,
-    ExpenseCategory? category,
+    String? category,
     DateTime? date,
+    String? userId,
   }) {
     return Expense(
       id: id ?? this.id,
-      userId: userId ?? this.userId,
+      title: title ?? this.title,
       amount: amount ?? this.amount,
-      description: description ?? this.description,
       category: category ?? this.category,
       date: date ?? this.date,
+      userId: userId ?? this.userId,
     );
   }
+
+  @override
+  String toString() {
+    return 'Expense(id: $id, title: $title, amount: $amount, category: $category, date: $date, userId: $userId)';
+  }
+
+  Color get categoryColor => ExpenseCategory.getColorForCategory(category);
+  IconData get categoryIcon => ExpenseCategory.getIconForCategory(category);
+  String get categoryDisplayName => ExpenseCategory.getDisplayName(category);
 }

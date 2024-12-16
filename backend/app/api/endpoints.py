@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from bson import ObjectId
 from ..models.user import User, UserProfileResponse, LoginResponse, ClearUsersRequest
 from ..models.expense import Expense, ExpenseCreate
@@ -166,49 +166,61 @@ async def create_expense(
     user_id: str = Depends(get_current_user)
 ):
     try:
-        # Validate and prepare expense data
-        expense_data = expense.dict()
-        expense_data["user_id"] = user_id
-        
-        # Convert string date to datetime if present
-        if "date" in expense_data and isinstance(expense_data["date"], str):
-            expense_data["date"] = datetime.fromisoformat(expense_data["date"])
+        # Validate amount
+        if expense.amount <= 0:
+            raise HTTPException(
+                status_code=400,
+                detail="Amount must be greater than 0"
+            )
 
-        # Insert into database
+        # Validate category
+        valid_categories = [
+            'food', 'transportation', 'entertainment', 
+            'shopping', 'utilities', 'health', 
+            'education', 'other'
+        ]
+        if expense.category.lower() not in valid_categories:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid category. Must be one of: {', '.join(valid_categories)}"
+            )
+
+        # Validate date
+        try:
+            expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+            if expense_date > datetime.now() + timedelta(days=1):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Expense date cannot be in the future"
+                )
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid date format"
+            )
+
+        # Prepare expense data
+        expense_data = {
+            "description": expense.description.strip(),
+            "amount": float(expense.amount),
+            "category": expense.category.lower(),
+            "date": expense_date,
+            "user_id": user_id
+        }
+
+        # Insert expense
         result = await db.expenses.insert_one(expense_data)
-        
-        if not result.inserted_id:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create expense"
-            )
+        expense_data["id"] = str(result.inserted_id)
 
-        # Fetch the created expense
-        created_expense = await db.expenses.find_one({"_id": result.inserted_id})
-        if not created_expense:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Created expense not found"
-            )
+        return expense_data
 
-        # Convert ObjectId to string and create Expense model
-        created_expense["id"] = str(created_expense["_id"])
-        del created_expense["_id"]
-        
-        # The date is already a datetime object from MongoDB
-        return Expense(**created_expense)
-
-    except ValueError as e:
-        logger.error(f"Error creating expense: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error creating expense: {str(e)}")
+        logger.error(f"Error creating expense: {str(e)}", exc_info=True)
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error creating expense: {str(e)}"
+            status_code=500,
+            detail="Internal server error while creating expense"
         )
 
 @router.get("/expenses", response_model=list[Expense])
@@ -263,24 +275,58 @@ async def update_expense(
     user_id: str = Depends(get_current_user)
 ):
     try:
-        # Check if expense exists and belongs to user
-        existing = await db.expenses.find_one({
+        # Validate expense exists and belongs to user
+        existing_expense = await db.expenses.find_one({
             "_id": ObjectId(expense_id),
             "user_id": user_id
         })
-        
-        if not existing:
+
+        if not existing_expense:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Expense not found"
+                status_code=404,
+                detail="Expense not found or does not belong to user"
             )
 
-        # Update the expense
-        update_data = expense.dict(exclude={"id"})
-        
-        # Convert string date to datetime if present
-        if "date" in update_data and isinstance(update_data["date"], str):
-            update_data["date"] = datetime.fromisoformat(update_data["date"])
+        # Validate amount
+        if expense.amount <= 0:
+            raise HTTPException(
+                status_code=400,
+                detail="Amount must be greater than 0"
+            )
+
+        # Validate category
+        valid_categories = [
+            'food', 'transportation', 'entertainment', 
+            'shopping', 'utilities', 'health', 
+            'education', 'other'
+        ]
+        if expense.category.lower() not in valid_categories:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid category. Must be one of: {', '.join(valid_categories)}"
+            )
+
+        # Validate date
+        try:
+            expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+            if expense_date > datetime.now() + timedelta(days=1):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Expense date cannot be in the future"
+                )
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid date format"
+            )
+
+        # Update expense
+        update_data = {
+            "description": expense.description.strip(),
+            "amount": float(expense.amount),
+            "category": expense.category.lower(),
+            "date": expense_date,
+        }
 
         result = await db.expenses.update_one(
             {"_id": ObjectId(expense_id)},
@@ -289,28 +335,23 @@ async def update_expense(
 
         if result.modified_count == 0:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Expense not modified"
+                status_code=400,
+                detail="No changes made to expense"
             )
 
         # Get updated expense
-        updated = await db.expenses.find_one({"_id": ObjectId(expense_id)})
-        updated["id"] = str(updated["_id"])
-        del updated["_id"]
-        
-        # The date is already a datetime object from MongoDB
-        return Expense(**updated)
+        updated_expense = await db.expenses.find_one({"_id": ObjectId(expense_id)})
+        updated_expense["id"] = str(updated_expense.pop("_id"))
 
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        return updated_expense
+
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error updating expense: {str(e)}")
+        logger.error(f"Error updating expense: {str(e)}", exc_info=True)
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error updating expense: {str(e)}"
+            status_code=500,
+            detail="Internal server error while updating expense"
         )
 
 @router.delete("/expenses/{expense_id}")

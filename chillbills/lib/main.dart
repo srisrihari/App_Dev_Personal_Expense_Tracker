@@ -6,35 +6,41 @@ import 'providers/auth_provider.dart';
 import 'providers/expense_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
+import 'services/api_service.dart';
 import 'widgets/chillbills_logo.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => ExpenseProvider()),
-      ],
-      child: const ChillBillsApp(),
-    ),
+    const MyApp(),
   );
 }
 
-class ChillBillsApp extends StatelessWidget {
-  const ChillBillsApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ChillBills',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+    final apiService = ApiService();
+
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider(apiService)),
+        ChangeNotifierProvider(create: (_) => ExpenseProvider(apiService)),
+      ],
+      child: MaterialApp(
+        title: 'ChillBills',
+        theme: ThemeData(
+          primaryColor: const Color(0xFF6A5AE0),
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF6A5AE0),
+          ),
+          useMaterial3: true,
+        ),
+        home: const SplashScreen(),
+        debugShowCheckedModeBanner: false,
       ),
-      home: const SplashScreen(),
-      debugShowCheckedModeBanner: false,
     );
   }
 }

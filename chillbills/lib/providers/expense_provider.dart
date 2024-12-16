@@ -1,167 +1,214 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
 import '../models/expense.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../services/api_service.dart';
 
 class ExpenseProvider with ChangeNotifier {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService;
   List<Expense> _expenses = [];
   bool _isLoading = false;
+  String? _error;
+
+  ExpenseProvider(this._apiService);
 
   List<Expense> get expenses => _expenses;
   bool get isLoading => _isLoading;
+  String? get error => _error;
+
+  void _setError(String? error) {
+    _error = error;
+    notifyListeners();
+  }
 
   Future<void> fetchExpenses() async {
-    _isLoading = true;
-    notifyListeners();
-
     try {
-      final fetchedExpenses = await _apiService.getExpenses();
-      _expenses = fetchedExpenses;
-      debugPrint('Fetched ${_expenses.length} expenses');
+      _isLoading = true;
+      _setError(null);
+      notifyListeners();
+
+      final response = await _apiService.get('/expenses');
+      debugPrint('Response Status: ${response.statusCode}');
+      debugPrint('Response Body: ${response.data}');
+      
+      if (response.statusCode == 200 && response.data != null) {
+        final List<dynamic> data = response.data is List ? response.data : [];
+        _expenses = data.map((json) => Expense.fromJson(json)).toList();
+        _expenses.sort((a, b) => b.date.compareTo(a.date)); // Sort by date, newest first
+      } else {
+        _setError('Failed to fetch expenses: ${response.error}');
+      }
     } catch (e) {
       debugPrint('Error fetching expenses: $e');
+      _setError('Failed to fetch expenses: $e');
       _expenses = [];
-      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<bool> addExpense(Expense expense) async {
+  Future<Expense?> addExpense(Expense expense) async {
     try {
-      final newExpense = await _apiService.createExpense(expense);
-      _expenses.add(newExpense);
+      _isLoading = true;
+      _setError(null);
       notifyListeners();
-      return true;
+
+      final savedExpense = await _apiService.saveExpense(expense);
+      _expenses.insert(0, savedExpense); // Add at the beginning since we sort by date
+      return savedExpense;
     } catch (e) {
       debugPrint('Error adding expense: $e');
-      return false;
+      _setError('Failed to add expense: $e');
+      return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
-  Future<bool> updateExpense(Expense expense) async {
+  Future<Expense?> updateExpense(Expense expense) async {
     try {
-      final updatedExpense = await _apiService.updateExpense(expense);
+      _isLoading = true;
+      _setError(null);
+      notifyListeners();
+
+      if (expense.id == null) {
+        _setError('Cannot update expense without an ID');
+        return null;
+      }
+
+      final savedExpense = await _apiService.saveExpense(expense);
       final index = _expenses.indexWhere((e) => e.id == expense.id);
       if (index != -1) {
-        _expenses[index] = updatedExpense;
-        notifyListeners();
+        _expenses[index] = savedExpense;
       }
-      return true;
+      return savedExpense;
     } catch (e) {
       debugPrint('Error updating expense: $e');
-      return false;
+      _setError('Failed to update expense: $e');
+      return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
   Future<bool> deleteExpense(String expenseId) async {
     try {
-      await _apiService.deleteExpense(expenseId);
-      _expenses.removeWhere((e) => e.id == expenseId);
+      _isLoading = true;
+      _setError(null);
       notifyListeners();
-      return true;
+
+      final response = await _apiService.delete('/expenses/$expenseId');
+
+      if (response.statusCode == 200) {
+        _expenses.removeWhere((e) => e.id == expenseId);
+        return true;
+      } else {
+        _setError('Failed to delete expense: ${response.error}');
+        return false;
+      }
     } catch (e) {
       debugPrint('Error deleting expense: $e');
+      _setError('Failed to delete expense: $e');
       return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
+  }
+
+  // Insights methods
+  Map<String, double> getCategoryTotals() {
+    final totals = <String, double>{};
+    for (final expense in _expenses) {
+      totals[expense.category] = (totals[expense.category] ?? 0) + expense.amount;
+    }
+    return totals;
   }
 
   double getTotalExpenses() {
-    return _expenses.fold(0.0, (sum, expense) => sum + expense.amount);
+    return _expenses.fold(0, (sum, expense) => sum + expense.amount);
   }
 
-  List<Expense> getExpensesByCategory() {
-    final categoryTotals = <String, double>{};
-    for (var expense in _expenses) {
-      categoryTotals[expense.category.toString().split('.').last] = 
-        (categoryTotals[expense.category.toString().split('.').last] ?? 0) + expense.amount;
+  List<ExpenseInsights> getMonthlyInsights() {
+    final insights = <ExpenseInsights>[];
+    if (_expenses.isEmpty) return insights;
+
+    // Group expenses by month
+    final expensesByMonth = <DateTime, List<Expense>>{};
+    for (final expense in _expenses) {
+      final date = DateTime(expense.date.year, expense.date.month);
+      expensesByMonth[date] = [...(expensesByMonth[date] ?? []), expense];
     }
-    return _expenses;
+
+    // Calculate insights for each month
+    expensesByMonth.forEach((date, expenses) {
+      final totalAmount = expenses.fold(0.0, (sum, e) => sum + e.amount);
+      final categoryTotals = <String, double>{};
+      for (final expense in expenses) {
+        categoryTotals[expense.category] = 
+            (categoryTotals[expense.category] ?? 0) + expense.amount;
+      }
+
+      insights.add(ExpenseInsights(
+        date: date,
+        totalAmount: totalAmount,
+        categoryTotals: categoryTotals,
+      ));
+    });
+
+    // Sort insights by date (newest first)
+    insights.sort((a, b) => b.date.compareTo(a.date));
+    return insights;
   }
 
-  List<Expense> getExpensesByDateRange(DateTime start, DateTime end) {
-    return _expenses.where((expense) {
-      return expense.date.isAfter(start) && expense.date.isBefore(end);
-    }).toList();
-  }
+  List<DailyInsight> getDailyInsights() {
+    final insights = <DailyInsight>[];
+    if (_expenses.isEmpty) return insights;
 
-  Future<String?> getUserId() async {
-    try {
-      return await _apiService.getUserId();
-    } catch (e) {
-      debugPrint('Error getting user ID: $e');
-      return null;
+    // Group expenses by day
+    final expensesByDay = <DateTime, List<Expense>>{};
+    for (final expense in _expenses) {
+      final date = DateTime(expense.date.year, expense.date.month, expense.date.day);
+      expensesByDay[date] = [...(expensesByDay[date] ?? []), expense];
     }
-  }
 
-  Future<void> fetchExpenseInsights() async {
-    try {
-      // Removed this method as it was not present in the updated code
-    } catch (e) {
-      debugPrint('Error fetching expense insights: $e');
-    }
-  }
+    // Calculate insights for each day
+    expensesByDay.forEach((date, expenses) {
+      final totalAmount = expenses.fold(0.0, (sum, e) => sum + e.amount);
+      insights.add(DailyInsight(
+        date: date,
+        totalAmount: totalAmount,
+        expenses: expenses,
+      ));
+    });
 
-  String getInsightMessage(DailyInsight insight) {
-    if (insight.performance == 'below_average') {
-      return 'Great job! You spent ${insight.differencePercentage.toStringAsFixed(2)}% less than your average today.';
-    } else {
-      return 'You spent ${insight.differencePercentage.toStringAsFixed(2)}% more than your average today. Try to be more mindful of your expenses.';
-    }
-  }
-
-  String getMonthlyInsightMessage() {
-    // Removed this method as it was not present in the updated code
-    return '';
+    // Sort insights by date (newest first)
+    insights.sort((a, b) => b.date.compareTo(a.date));
+    return insights;
   }
 }
 
 class ExpenseInsights {
-  final double totalMonthlyExpense;
-  final double averageMonthlyExpense;
-  final double averageWeeklyExpense;
-  final List<DailyInsight> dailyInsights;
+  final DateTime date;
+  final double totalAmount;
+  final Map<String, double> categoryTotals;
 
   ExpenseInsights({
-    required this.totalMonthlyExpense,
-    required this.averageMonthlyExpense,
-    required this.averageWeeklyExpense,
-    required this.dailyInsights,
+    required this.date,
+    required this.totalAmount,
+    required this.categoryTotals,
   });
-
-  factory ExpenseInsights.fromJson(Map<String, dynamic> json) {
-    return ExpenseInsights(
-      totalMonthlyExpense: (json['total_monthly_expense'] ?? 0.0).toDouble(),
-      averageMonthlyExpense: (json['average_monthly_expense'] ?? 0.0).toDouble(),
-      averageWeeklyExpense: (json['average_weekly_expense'] ?? 0.0).toDouble(),
-      dailyInsights: (json['daily_insights'] as List<dynamic>?)
-          ?.map((insight) => DailyInsight.fromJson(insight))
-          .toList() ?? [],
-    );
-  }
 }
 
 class DailyInsight {
-  final String date;
-  final double amount;
-  final String performance;
-  final double differencePercentage;
+  final DateTime date;
+  final double totalAmount;
+  final List<Expense> expenses;
 
   DailyInsight({
     required this.date,
-    required this.amount,
-    required this.performance,
-    required this.differencePercentage,
+    required this.totalAmount,
+    required this.expenses,
   });
-
-  factory DailyInsight.fromJson(Map<String, dynamic> json) {
-    return DailyInsight(
-      date: json['date'],
-      amount: (json['amount'] ?? 0.0).toDouble(),
-      performance: json['performance'] ?? 'neutral',
-      differencePercentage: (json['difference_percentage'] ?? 0.0).toDouble(),
-    );
-  }
 }

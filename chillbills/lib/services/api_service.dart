@@ -2,10 +2,20 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../models/expense.dart';
+
+class ApiResponse {
+  final dynamic data;
+  final int statusCode;
+  final String? error;
+
+  ApiResponse({
+    required this.data,
+    required this.statusCode,
+    this.error,
+  });
+}
 
 class ApiService {
   static String get baseUrl {
@@ -19,13 +29,11 @@ class ApiService {
 
   ApiService({http.Client? client}) : client = client ?? http.Client();
 
-  // Helper method to get token
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('access_token');
   }
 
-  // Helper method to get headers with authorization
   Future<Map<String, String>> _getHeaders() async {
     final token = await _getToken();
     return {
@@ -34,77 +42,198 @@ class ApiService {
     };
   }
 
-  // Ensure URL always has a trailing slash
-  String _ensureTrailingSlash(String url) {
-    return url.endsWith('/') ? url : '$url/';
+  Future<ApiResponse> get(String endpoint) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '$baseUrl${endpoint.startsWith('/') ? endpoint : '/$endpoint'}';
+      debugPrint('GET Request: $url');
+      debugPrint('Headers: $headers');
+
+      final response = await client.get(
+        Uri.parse(url),
+        headers: headers,
+      );
+
+      debugPrint('Response Status: ${response.statusCode}');
+      debugPrint('Response Body: ${response.body}');
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return ApiResponse(
+          data: jsonDecode(response.body),
+          statusCode: response.statusCode,
+        );
+      } else {
+        final error = _parseErrorResponse(response);
+        return ApiResponse(
+          data: null,
+          statusCode: response.statusCode,
+          error: error,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in GET request: $e');
+      return ApiResponse(
+        data: null,
+        statusCode: 500,
+        error: 'Network error: ${e.toString()}',
+      );
+    }
+  }
+
+  String _parseErrorResponse(http.Response response) {
+    try {
+      final body = jsonDecode(response.body);
+      return body['detail'] ?? body['message'] ?? 'Unknown error occurred';
+    } catch (e) {
+      return response.body;
+    }
+  }
+
+  Future<ApiResponse> post(String endpoint, {dynamic data}) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '$baseUrl${endpoint.startsWith('/') ? endpoint : '/$endpoint'}';
+      debugPrint('POST Request: $url');
+      debugPrint('Headers: $headers');
+      debugPrint('Request Body: $data');
+
+      final response = await client.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(data),
+      );
+
+      debugPrint('Response Status: ${response.statusCode}');
+      debugPrint('Response Body: ${response.body}');
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return ApiResponse(
+          data: jsonDecode(response.body),
+          statusCode: response.statusCode,
+        );
+      } else {
+        final error = _parseErrorResponse(response);
+        return ApiResponse(
+          data: null,
+          statusCode: response.statusCode,
+          error: error,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in POST request: $e');
+      return ApiResponse(
+        data: null,
+        statusCode: 500,
+        error: 'Network error: ${e.toString()}',
+      );
+    }
+  }
+
+  Future<ApiResponse> put(String endpoint, {dynamic data}) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '$baseUrl${endpoint.startsWith('/') ? endpoint : '/$endpoint'}';
+      debugPrint('PUT Request: $url');
+      debugPrint('Headers: $headers');
+      debugPrint('Request Body: $data');
+
+      final response = await client.put(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(data),
+      );
+
+      debugPrint('Response Status: ${response.statusCode}');
+      debugPrint('Response Body: ${response.body}');
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return ApiResponse(
+          data: jsonDecode(response.body),
+          statusCode: response.statusCode,
+        );
+      } else {
+        final error = _parseErrorResponse(response);
+        return ApiResponse(
+          data: null,
+          statusCode: response.statusCode,
+          error: error,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in PUT request: $e');
+      return ApiResponse(
+        data: null,
+        statusCode: 500,
+        error: 'Network error: ${e.toString()}',
+      );
+    }
+  }
+
+  Future<ApiResponse> delete(String endpoint) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '$baseUrl${endpoint.startsWith('/') ? endpoint : '/$endpoint'}';
+      debugPrint('DELETE Request: $url');
+      debugPrint('Headers: $headers');
+
+      final response = await client.delete(
+        Uri.parse(url),
+        headers: headers,
+      );
+
+      debugPrint('Response Status: ${response.statusCode}');
+      debugPrint('Response Body: ${response.body}');
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return ApiResponse(
+          data: jsonDecode(response.body),
+          statusCode: response.statusCode,
+        );
+      } else {
+        final error = _parseErrorResponse(response);
+        return ApiResponse(
+          data: null,
+          statusCode: response.statusCode,
+          error: error,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in DELETE request: $e');
+      return ApiResponse(
+        data: null,
+        statusCode: 500,
+        error: 'Network error: ${e.toString()}',
+      );
+    }
   }
 
   // Authentication methods
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
-      // Try multiple possible endpoints
-      final possibleUrls = [
-        _ensureTrailingSlash('$baseUrl/token'),
-        _ensureTrailingSlash('$baseUrl/token/'),
-      ];
+      final url = '$baseUrl/token';
+      final response = await client.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json',
+        },
+        body: 'username=$email&password=$password',
+      );
 
-      for (final url in possibleUrls) {
-        debugPrint('Attempting Login URL: $url');
-        
-        final response = await client.post(
-          Uri.parse(url),
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Accept': 'application/json',
-          },
-          body: 'username=$email&password=$password',
-        );
+      debugPrint('Login Response Status Code: ${response.statusCode}');
+      debugPrint('Login Response Body: ${response.body}');
+      debugPrint('Login Response Headers: ${response.headers}');
 
-        debugPrint('Login Response Status Code: ${response.statusCode}');
-        debugPrint('Login Response Body: ${response.body}');
-        debugPrint('Login Response Headers: ${response.headers}');
-
-        // Handle redirects
-        if (response.statusCode == 307 || response.statusCode == 308) {
-          final redirectUrl = response.headers['location'];
-          if (redirectUrl != null) {
-            debugPrint('Redirecting to: $redirectUrl');
-            final redirectResponse = await client.post(
-              Uri.parse(redirectUrl),
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Accept': 'application/json',
-              },
-              body: 'username=$email&password=$password',
-            );
-
-            debugPrint('Redirect Response Status Code: ${redirectResponse.statusCode}');
-            debugPrint('Redirect Response Body: ${redirectResponse.body}');
-
-            if (redirectResponse.statusCode == 200) {
-              final responseBody = jsonDecode(redirectResponse.body);
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.setString('access_token', responseBody['access_token']);
-              await prefs.setString('user_id', responseBody['user_id']?.toString() ?? '');
-              await prefs.setString('username', responseBody['username']);
-              return responseBody;
-            }
-          }
-        }
-
-        // Direct success case
-        if (response.statusCode == 200) {
-          final responseBody = jsonDecode(response.body);
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('access_token', responseBody['access_token']);
-          await prefs.setString('user_id', responseBody['user_id']?.toString() ?? '');
-          await prefs.setString('username', responseBody['username']);
-          return responseBody;
-        }
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('access_token', responseBody['access_token']);
+        await prefs.setString('user_id', responseBody['user_id']?.toString() ?? '');
+        await prefs.setString('username', responseBody['username']);
+        return responseBody;
+      } else {
+        throw Exception('Login failed. Unable to authenticate.');
       }
-
-      // If no successful login found
-      throw Exception('Login failed. Unable to authenticate.');
     } catch (e) {
       debugPrint('Login error details: $e');
       rethrow;
@@ -137,8 +266,9 @@ class ApiService {
     required String password
   }) async {
     try {
+      final url = '$baseUrl/users/';
       final response = await client.post(
-        Uri.parse('$baseUrl/users/'),
+        Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -199,8 +329,9 @@ class ApiService {
         throw Exception('User not authenticated');
       }
 
+      final url = '$baseUrl/expenses';
       final response = await client.get(
-        Uri.parse('$baseUrl/expenses'),
+        Uri.parse(url),
         headers: headers,
       );
 
@@ -216,8 +347,13 @@ class ApiService {
     }
   }
 
-  Future<Expense> createExpense(Expense expense) async {
+  Future<Expense> saveExpense(Expense expense) async {
     try {
+      final String endpoint = expense.id == null || expense.id!.isEmpty
+          ? '/expenses'
+          : '/expenses/${expense.id}';
+      final String method = expense.id == null || expense.id!.isEmpty ? 'POST' : 'PUT';
+
       final headers = await _getHeaders();
       final userId = await getUserId();
       
@@ -228,49 +364,26 @@ class ApiService {
       final expenseData = expense.toJson();
       expenseData['user_id'] = userId;
 
-      final response = await client.post(
-        Uri.parse('$baseUrl/expenses'),
-        headers: headers,
-        body: jsonEncode(expenseData),
-      );
+      final url = '$baseUrl$endpoint';
+      final response = method == 'POST'
+        ? await client.post(
+            Uri.parse(url),
+            headers: headers,
+            body: jsonEncode(expenseData),
+          )
+        : await client.put(
+            Uri.parse(url),
+            headers: headers,
+            body: jsonEncode(expenseData),
+          );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return Expense.fromJson(jsonDecode(response.body));
       } else {
-        throw Exception('Failed to create expense: ${response.body}');
+        throw Exception('Failed to save expense: ${response.body}');
       }
     } catch (e) {
-      debugPrint('Error in createExpense: $e');
-      rethrow;
-    }
-  }
-
-  Future<Expense> updateExpense(Expense expense) async {
-    try {
-      final headers = await _getHeaders();
-      final userId = await getUserId();
-      
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
-
-      if (expense.id.isEmpty) {
-        throw Exception('Expense ID is required for update');
-      }
-
-      final response = await client.put(
-        Uri.parse('$baseUrl/expenses/${expense.id}'),
-        headers: headers,
-        body: jsonEncode(expense.toJson()),
-      );
-
-      if (response.statusCode == 200) {
-        return Expense.fromJson(jsonDecode(response.body));
-      } else {
-        throw Exception('Failed to update expense: ${response.body}');
-      }
-    } catch (e) {
-      debugPrint('Error in updateExpense: $e');
+      debugPrint('Error in saveExpense: $e');
       rethrow;
     }
   }
@@ -284,8 +397,9 @@ class ApiService {
         throw Exception('User not authenticated');
       }
 
+      final url = '$baseUrl/expenses/$expenseId';
       final response = await client.delete(
-        Uri.parse('$baseUrl/expenses/$expenseId'),
+        Uri.parse(url),
         headers: headers,
       );
 
@@ -306,7 +420,7 @@ class ApiService {
     required int year
   }) async {
     try {
-      final url = _ensureTrailingSlash('$baseUrl/budgets');
+      final url = '$baseUrl/budgets';
       final headers = await _getHeaders();
       
       final response = await client.post(
@@ -335,7 +449,7 @@ class ApiService {
 
   Future<List<dynamic>> getBudgets(int month, int year) async {
     try {
-      final url = _ensureTrailingSlash('$baseUrl/budgets/$month/$year');
+      final url = '$baseUrl/budgets/$month/$year';
       final headers = await _getHeaders();
       
       final response = await client.get(
@@ -357,7 +471,7 @@ class ApiService {
 
   Future<List<dynamic>> getAllBudgets() async {
     try {
-      final url = _ensureTrailingSlash('$baseUrl/budgets');
+      final url = '$baseUrl/budgets';
       final headers = await _getHeaders();
       
       final response = await client.get(
@@ -374,20 +488,6 @@ class ApiService {
     } catch (e) {
       debugPrint('Get all budgets error: $e');
       rethrow;
-    }
-  }
-
-  Future<dynamic> get(String endpoint) async {
-    final headers = await _getHeaders();
-    final response = await client.get(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: headers,
-    );
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('HTTP Error: ${response.statusCode}\n${response.body}');
     }
   }
 }

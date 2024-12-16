@@ -9,68 +9,54 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        backgroundColor: const Color(0xFF6A5AE0),
-      ),
-      body: Consumer<AuthProvider>(
-        builder: (context, authProvider, child) {
-          final user = authProvider.currentUser;
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        final user = authProvider.currentUser;
 
-          if (user == null) {
-            return const Center(child: Text('Please log in'));
-          }
+        if (user == null) {
+          return const Center(child: Text('Please log in'));
+        }
 
-          return SingleChildScrollView(
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Profile'),
+            backgroundColor: const Color(0xFF6A5AE0),
+          ),
+          body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // User Profile Card
-                  Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                            radius: 50,
-                            backgroundImage: user.photoUrl != null 
-                              ? NetworkImage(user.photoUrl!) 
-                              : null,
-                            child: user.photoUrl == null 
-                              ? Icon(
-                                  Icons.person, 
-                                  size: 50, 
-                                  color: Colors.grey[600]
-                                )
-                              : null,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            user.name ?? 'User',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            user.email ?? 'No email',
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
+                  Center(
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.blue.shade100,
+                      child: Text(
+                        user.name[0].toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
                       ),
                     ),
                   ),
-
+                  const SizedBox(height: 16),
+                  Text(
+                    user.name ?? 'User',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    user.email ?? 'No email',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                    ),
+                  ),
                   const SizedBox(height: 20),
 
                   // Profile Actions
@@ -98,23 +84,31 @@ class ProfileScreen extends StatelessWidget {
                     },
                   ),
 
-                  _buildProfileAction(
-                    context,
-                    icon: Icons.logout,
-                    title: 'Logout',
-                    onTap: () {
-                      authProvider.logout();
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      );
-                    },
+                  const Spacer(),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        authProvider.logout();
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        );
+                      },
+                      icon: const Icon(Icons.logout),
+                      label: const Text('Logout'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
