@@ -1,0 +1,9 @@
+fastapi
+motor
+pydantic>=2.0.0
+python-jose[cryptography]
+bcrypt
+python-multipart
+uvicorn
+pymongo
+python-dotenv
