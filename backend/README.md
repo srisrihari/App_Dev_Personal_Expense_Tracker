@@ -1,176 +1,205 @@
-# ChillBills Backend API
+# ChillBills Backend
 
-A FastAPI-based backend service for the ChillBills expense tracking application.
+FastAPI-based backend service for the ChillBills expense management application.
 
-## Features
+## Technology Stack
 
-- User Authentication (JWT-based)
-- Expense Management (CRUD operations)
-- Expense Analytics and Insights
-- MongoDB Integration
-- Comprehensive Error Handling
-- CORS Support
-- Detailed Logging
+- **Framework**: FastAPI
+- **Database**: PostgreSQL
+- **ORM**: SQLAlchemy
+- **Authentication**: JWT
+- **Testing**: pytest
+- **Documentation**: Swagger/OpenAPI
 
-## Prerequisites
+## Project Structure
 
-- Python 3.8+
-- MongoDB 4.4+
-- pip (Python package manager)
-
-## Installation
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd backend
-```
-
-2. Create and activate a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-4. Create a `.env` file in the root directory with the following variables:
-```env
-MONGODB_URL=mongodb://localhost:27017
-DATABASE_NAME=chillbills
-SECRET_KEY=your-secret-key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-```
-
-## Running the Application
-
-1. Start MongoDB:
-```bash
-mongod
-```
-
-2. Run the FastAPI server:
-```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
-
-The API will be available at `http://localhost:8000`
-
-## API Documentation
-
-After starting the server, you can access:
-- Interactive API documentation: `http://localhost:8000/docs`
-- Alternative API documentation: `http://localhost:8000/redoc`
-
-### Main Endpoints
-
-#### Authentication
-- `POST /token`: Login and get access token
-- `POST /users`: Create new user
-- `GET /users/me`: Get current user profile
-
-#### Expenses
-- `GET /expenses`: List all expenses
-- `POST /expenses`: Create new expense
-- `GET /expenses/{id}`: Get specific expense
-- `PUT /expenses/{id}`: Update expense
-- `DELETE /expenses/{id}`: Delete expense
-
-#### Analytics
-- `GET /expenses/insights`: Get expense insights and analytics
-
-## Data Models
-
-### User
-```python
-{
-    "username": str,
-    "email": str,
-    "password": str (hashed)
-}
-```
-
-### Expense
-```python
-{
-    "id": str,
-    "amount": float,
-    "description": str,
-    "category": str (enum),
-    "date": datetime,
-    "user_id": str
-}
-```
-
-### Categories
-- food
-- transportation
-- entertainment
-- shopping
-- utilities
-- health
-- education
-- other
-
-## Error Handling
-
-The API implements comprehensive error handling:
-- 400: Bad Request
-- 401: Unauthorized
-- 403: Forbidden
-- 404: Not Found
-- 422: Validation Error
-- 500: Internal Server Error
-
-## Security
-
-- JWT-based authentication
-- Password hashing using bcrypt
-- CORS middleware
-- Input validation using Pydantic
-- Environment variable configuration
-
-## Development
-
-### Project Structure
 ```
 backend/
 ├── app/
 │   ├── api/
-│   │   └── endpoints.py
+│   │   ├── endpoints/
+│   │   │   ├── auth.py
+│   │   │   ├── expenses.py
+│   │   │   └── users.py
+│   │   └── deps.py
 │   ├── core/
 │   │   ├── config.py
-│   │   └── database.py
+│   │   ├── security.py
+│   │   └── deps.py
+│   ├── db/
+│   │   ├── base.py
+│   │   └── session.py
 │   ├── models/
-│   │   ├── user.py
-│   │   └── expense.py
-│   └── utils/
-│       ├── auth.py
-│       └── logging.py
-├── main.py
+│   │   ├── expense.py
+│   │   └── user.py
+│   └── schemas/
+│       ├── expense.py
+│       └── user.py
+├── tests/
+│   ├── api/
+│   ├── core/
+│   └── conftest.py
+├── alembic/
+│   └── versions/
 ├── requirements.txt
-└── README.md
+└── main.py
 ```
 
-### Contributing
+## API Endpoints
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+### Authentication
+```
+POST /api/auth/login
+POST /api/auth/register
+POST /api/auth/refresh-token
+```
 
-## Testing
+### Expenses
+```
+GET    /api/expenses
+POST   /api/expenses
+GET    /api/expenses/{id}
+PUT    /api/expenses/{id}
+DELETE /api/expenses/{id}
+```
 
-Run tests using pytest:
+### Users
+```
+GET    /api/users/me
+PUT    /api/users/me
+DELETE /api/users/me
+```
+
+### Analytics
+```
+GET    /api/analytics/monthly
+GET    /api/analytics/category
+GET    /api/analytics/trends
+```
+
+## Setup and Installation
+
+1. **Create Virtual Environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Windows: venv\Scripts\activate
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Environment Variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+4. **Database Setup**
+   ```bash
+   # Create database
+   createdb chillbills
+
+   # Run migrations
+   alembic upgrade head
+   ```
+
+5. **Run Development Server**
+   ```bash
+   uvicorn main:app --reload
+   ```
+
+## Development
+
+### Code Style
+- Follow PEP 8 guidelines
+- Use type hints
+- Document functions and classes
+
+### Running Tests
 ```bash
 pytest
+pytest --cov=app tests/
 ```
+
+### Database Migrations
+```bash
+# Create migration
+alembic revision --autogenerate -m "description"
+
+# Apply migration
+alembic upgrade head
+
+# Rollback
+alembic downgrade -1
+```
+
+## Deployment
+
+### Using Docker
+```bash
+# Build image
+docker build -t chillbills-backend .
+
+# Run container
+docker run -d -p 8000:8000 chillbills-backend
+```
+
+### Using Docker Compose
+```bash
+docker-compose up -d
+```
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| DATABASE_URL | PostgreSQL connection URL | postgresql://user:pass@localhost/chillbills |
+| SECRET_KEY | JWT secret key | None |
+| ALGORITHM | JWT algorithm | HS256 |
+| ACCESS_TOKEN_EXPIRE_MINUTES | Token expiry | 30 |
+
+## API Documentation
+
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+## Security
+
+- JWT authentication
+- Password hashing with bcrypt
+- CORS middleware
+- Rate limiting
+- Input validation
+- SQL injection prevention
+
+## Error Handling
+
+All API endpoints follow a consistent error response format:
+
+```json
+{
+  "detail": {
+    "msg": "Error message",
+    "code": "ERROR_CODE"
+  }
+}
+```
+
+Common error codes:
+- `AUTHENTICATION_ERROR`
+- `VALIDATION_ERROR`
+- `NOT_FOUND`
+- `PERMISSION_DENIED`
+
+## Contributing
+
+1. Follow the project's code style
+2. Write tests for new features
+3. Update documentation
+4. Create detailed pull requests
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT License - see LICENSE file for details

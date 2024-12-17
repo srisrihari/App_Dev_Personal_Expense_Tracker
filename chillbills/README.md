@@ -70,209 +70,261 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Frontend README
 
-### ChillBills - Expense Tracking App
+# ChillBills Flutter App
 
-A modern, user-friendly expense tracking application built with Flutter.
+A modern, cross-platform expense management application built with Flutter.
 
-### Features
+## Technology Stack
 
-- User Authentication
-- Expense Management (Add, Edit, Delete)
-- Expense Categories
-- Expense Analytics and Insights
-- Beautiful Material Design UI
-- Dark/Light Theme Support
-- Responsive Layout
-- Offline Data Support
-- Interactive Charts and Visualizations
+- **Framework**: Flutter
+- **State Management**: Provider
+- **HTTP Client**: http package
+- **Local Storage**: shared_preferences
+- **Charts**: fl_chart
+- **UI Components**: Material Design
 
-### Screenshots
-
-[Add screenshots of your app here]
-
-### Prerequisites
-
-- Flutter SDK 3.1.0 or higher
-- Dart SDK 3.0.0 or higher
-- Android Studio / VS Code
-- Android SDK for Android deployment
-- Xcode for iOS deployment
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd chillbills
-```
-
-2. Install dependencies:
-```bash
-flutter pub get
-```
-
-3. Run the app:
-```bash
-flutter run
-```
-
-### Project Structure
+## Project Structure
 
 ```
 lib/
-├── main.dart
-├── app.dart
-├── models/
-│   ├── user.dart
-│   └── expense.dart
-├── providers/
-│   ├── auth_provider.dart
-│   └── expense_provider.dart
-├── screens/
+├── main.dart                    # App entry point
+├── models/                      # Data models
+│   ├── expense.dart
+│   └── user.dart
+├── screens/                     # UI screens
 │   ├── auth/
 │   │   ├── login_screen.dart
 │   │   └── register_screen.dart
+│   ├── dashboard/
+│   │   └── dashboard_screen.dart
 │   ├── expenses/
 │   │   ├── add_expense_screen.dart
-│   │   ├── edit_expense_screen.dart
 │   │   └── expense_list_screen.dart
-│   └── insights/
-│       └── insights_screen.dart
-├── services/
+│   ├── insights/
+│   │   └── insights_screen.dart
+│   └── profile/
+│       └── profile_screen.dart
+├── providers/                   # State management
+│   ├── auth_provider.dart
+│   └── expense_provider.dart
+├── services/                    # API services
 │   └── api_service.dart
-├── utils/
-│   ├── constants.dart
-│   └── theme.dart
-└── widgets/
+└── widgets/                     # Reusable widgets
     ├── expense_card.dart
-    ├── category_picker.dart
-    └── charts/
-        ├── expense_pie_chart.dart
-        └── expense_line_chart.dart
+    └── chart_widgets.dart
 ```
 
-### Architecture
+## Features
 
-The app follows a Provider-based architecture with the following components:
-
-- **Models**: Data classes that represent the app's data structures
-- **Providers**: State management using the Provider package
-- **Screens**: UI components and business logic
-- **Services**: API communication and data persistence
-- **Utils**: Helper functions and constants
-- **Widgets**: Reusable UI components
-
-### Features in Detail
-
-#### Authentication
-- Secure login and registration
-- JWT token management
-- Persistent session management
-
-#### Expense Management
-- Add new expenses with title, amount, category, and date
-- Edit existing expenses
-- Delete expenses with confirmation
+### Expense Management
+- Add, edit, and delete expenses
 - Categorize expenses
-- Date selection
+- Track spending patterns
+- Multi-currency support
 
-#### Analytics
-- Total expenses overview
-- Category-wise expense distribution
-- Monthly trends
-- Interactive charts
-- Expense insights
+### Analytics & Insights
+- Monthly spending overview
+- Category-wise breakdown
+- Visual charts and graphs
+- Spending trends
 
-#### UI/UX
-- Material Design 3
-- Responsive layout
-- Smooth animations
-- Error handling with user feedback
-- Loading indicators
-- Pull-to-refresh
-- Swipe-to-delete
+### User Experience
+- Clean, modern UI
+- Responsive design
+- Dark/Light theme
+- Cross-platform support
 
-### Dependencies
+### Security
+- Secure token storage
+- Data encryption
+- Input validation
+- Error handling
 
-- `provider`: ^6.0.5 - State management
-- `http`: ^1.1.0 - API communication
-- `shared_preferences`: ^2.2.2 - Local storage
-- `fl_chart`: ^0.65.0 - Charts and graphs
-- `intl`: ^0.19.0 - Internationalization and formatting
-- `google_fonts`: ^6.1.0 - Custom fonts
-- `curved_navigation_bar`: ^1.0.3 - Bottom navigation
-- `uuid`: ^4.2.1 - Unique ID generation
+## Setup and Installation
 
-### API Integration
+1. **Prerequisites**
+   - Flutter SDK
+   - Android Studio / Xcode
+   - VS Code (recommended)
 
-The app communicates with a FastAPI backend server. The base URL can be configured in `lib/services/api_service.dart`.
+2. **Clone Repository**
+   ```bash
+   git clone <repository-url>
+   cd chillbills
+   ```
 
-#### API Endpoints Used:
-- Authentication: `/token`
-- User Management: `/users`
-- Expenses: `/expenses`
-- Analytics: `/expenses/insights`
+3. **Install Dependencies**
+   ```bash
+   flutter pub get
+   ```
+
+4. **Run the App**
+   ```bash
+   flutter run
+   ```
+
+## Development
+
+### Code Style
+- Follow Flutter style guide
+- Use meaningful variable names
+- Document public APIs
+- Implement error handling
 
 ### State Management
-
-The app uses Provider for state management with two main providers:
-- `AuthProvider`: Handles user authentication state
-- `ExpenseProvider`: Manages expense data and operations
-
-### Error Handling
-
-- Comprehensive error handling for API calls
-- User-friendly error messages
-- Offline support with error states
-- Form validation
-- Network error handling
+Using Provider pattern for:
+- User authentication state
+- Expense data
+- Theme settings
+- App configuration
 
 ### Testing
-
-Run tests using:
 ```bash
+# Run unit tests
 flutter test
+
+# Run integration tests
+flutter test integration_test
 ```
 
-### Building for Production
+### Building
 
-1. Android:
+#### Android
 ```bash
+# Debug APK
+flutter build apk
+
+# Release APK
 flutter build apk --release
+
+# App Bundle
+flutter build appbundle
 ```
 
-2. iOS:
+#### iOS
 ```bash
-flutter build ios --release
+# Requires MacOS and Xcode
+flutter build ios
+
+# Archive for App Store
+flutter build ipa
 ```
 
-### Contributing
+#### Linux
+```bash
+flutter build linux
+```
+
+### Environment Configuration
+
+Create `.env` file:
+```env
+API_URL=http://localhost:8000
+ENABLE_LOGGING=true
+```
+
+## UI Components
+
+### Screens
+1. **Authentication**
+   - Login
+   - Registration
+   - Password Reset
+
+2. **Dashboard**
+   - Expense Summary
+   - Recent Transactions
+   - Quick Actions
+
+3. **Expenses**
+   - Add/Edit Expense
+   - Expense List
+   - Category Filter
+
+4. **Analytics**
+   - Monthly Overview
+   - Category Charts
+   - Trend Analysis
+
+5. **Profile**
+   - User Settings
+   - Preferences
+   - Account Management
+
+### Themes
+- Light Theme
+- Dark Theme
+- Custom Color Schemes
+
+## Error Handling
+
+```dart
+try {
+  // API calls
+} on NetworkException catch (e) {
+  showErrorDialog('Network Error', e.message);
+} on ValidationException catch (e) {
+  showErrorDialog('Validation Error', e.message);
+} catch (e) {
+  showErrorDialog('Error', 'An unexpected error occurred');
+}
+```
+
+## Performance Optimization
+
+- Lazy loading of images
+- Caching of API responses
+- Efficient state management
+- Memory leak prevention
+
+## Deployment
+
+### Android
+1. Update `android/app/build.gradle`
+2. Configure signing
+3. Build release APK
+4. Test on real devices
+5. Deploy to Play Store
+
+### iOS
+1. Update `ios/Runner.xcodeproj`
+2. Configure certificates
+3. Build release IPA
+4. Test on real devices
+5. Deploy to App Store
+
+### Linux
+1. Configure Linux desktop settings
+2. Build and package
+3. Test on target platforms
+4. Distribute package
+
+## Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+2. Create feature branch
+3. Commit changes
+4. Push to branch
+5. Create Pull Request
 
-### Known Issues
+## Troubleshooting
 
-- [List any known issues or limitations]
+### Common Issues
+1. Build Errors
+   - Clean project: `flutter clean`
+   - Get dependencies: `flutter pub get`
+   - Update Flutter: `flutter upgrade`
 
-### Future Improvements
+2. Runtime Errors
+   - Check API configuration
+   - Verify environment setup
+   - Review error logs
 
-- [ ] Add budget tracking
-- [ ] Implement notifications
-- [ ] Add export functionality
-- [ ] Support for multiple currencies
-- [ ] Cloud backup
-- [ ] Widget for home screen
+3. UI Issues
+   - Check device compatibility
+   - Verify widget tree
+   - Test different screen sizes
 
-### License
+## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-### Acknowledgments
-
-- Flutter team for the amazing framework
-- All the package authors
-- [Add any other acknowledgments]
+MIT License - see LICENSE file for details

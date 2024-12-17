@@ -531,3 +531,90 @@ date
 2024-12-16 22:57:43,846 - app.api.endpoints - ERROR - [endpoints.py:204] - Error creating expense: fromisoformat: argument must be str
 2024-12-16 22:57:55,359 - root - INFO - [main.py:33] - Starting up the application
 2024-12-16 22:57:55,368 - root - INFO - [main.py:35] - Successfully connected to the database
+2024-12-17 12:25:24,049 - root - INFO - [main.py:33] - Starting up the application
+2024-12-17 12:25:24,054 - root - INFO - [main.py:35] - Successfully connected to the database
+2024-12-17 12:26:37,982 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_field_start with no data
+2024-12-17 12:26:37,983 - multipart.multipart - DEBUG - [multipart.py:583] - Calling on_field_name with data[0:8]
+2024-12-17 12:26:37,983 - multipart.multipart - DEBUG - [multipart.py:583] - Calling on_field_data with data[9:12]
+2024-12-17 12:26:37,983 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_field_end with no data
+2024-12-17 12:26:37,983 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_field_start with no data
+2024-12-17 12:26:37,983 - multipart.multipart - DEBUG - [multipart.py:583] - Calling on_field_name with data[13:21]
+2024-12-17 12:26:37,983 - multipart.multipart - DEBUG - [multipart.py:583] - Calling on_field_data with data[22:28]
+2024-12-17 12:26:37,983 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_field_end with no data
+2024-12-17 12:26:37,983 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_end with no data
+2024-12-17 12:26:37,986 - passlib.handlers.bcrypt - DEBUG - [bcrypt.py:625] - detected 'bcrypt' backend, version '4.0.1'
+2024-12-17 12:26:37,987 - passlib.handlers.bcrypt - DEBUG - [bcrypt.py:406] - 'bcrypt' backend lacks $2$ support, enabling workaround
+2024-12-17 12:27:11,958 - app.api.endpoints - ERROR - [endpoints.py:220] - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer
+2024-12-17 12:27:40,513 - app.api.endpoints - ERROR - [endpoints.py:220] - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer
+2024-12-17 12:27:44,455 - app.api.endpoints - ERROR - [endpoints.py:220] - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer
+2024-12-17 12:27:49,399 - app.api.endpoints - ERROR - [endpoints.py:220] - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer
+2024-12-17 12:28:04,471 - root - INFO - [main.py:33] - Starting up the application
+2024-12-17 12:28:04,474 - root - INFO - [main.py:35] - Successfully connected to the database
+2024-12-17 12:28:37,137 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_field_start with no data
+2024-12-17 12:28:37,138 - multipart.multipart - DEBUG - [multipart.py:583] - Calling on_field_name with data[0:10]
+2024-12-17 12:28:37,138 - multipart.multipart - DEBUG - [multipart.py:583] - Calling on_field_data with data[11:19]
+2024-12-17 12:28:37,138 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_field_end with no data
+2024-12-17 12:28:37,138 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_field_start with no data
+2024-12-17 12:28:37,138 - multipart.multipart - DEBUG - [multipart.py:583] - Calling on_field_name with data[20:28]
+2024-12-17 12:28:37,138 - multipart.multipart - DEBUG - [multipart.py:583] - Calling on_field_data with data[29:32]
+2024-12-17 12:28:37,138 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_field_end with no data
+2024-12-17 12:28:37,138 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_field_start with no data
+2024-12-17 12:28:37,138 - multipart.multipart - DEBUG - [multipart.py:583] - Calling on_field_name with data[33:41]
+2024-12-17 12:28:37,139 - multipart.multipart - DEBUG - [multipart.py:583] - Calling on_field_data with data[42:48]
+2024-12-17 12:28:37,139 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_field_end with no data
+2024-12-17 12:28:37,139 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_end with no data
+2024-12-17 12:28:37,143 - passlib.handlers.bcrypt - DEBUG - [bcrypt.py:625] - detected 'bcrypt' backend, version '4.0.1'
+2024-12-17 12:28:37,143 - passlib.handlers.bcrypt - DEBUG - [bcrypt.py:406] - 'bcrypt' backend lacks $2$ support, enabling workaround
+2024-12-17 12:28:46,029 - app.api.endpoints - ERROR - [endpoints.py:220] - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer
+2024-12-17 12:28:51,341 - app.api.endpoints - ERROR - [endpoints.py:220] - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer
+2024-12-17 12:29:07,994 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_field_start with no data
+2024-12-17 12:29:07,994 - multipart.multipart - DEBUG - [multipart.py:583] - Calling on_field_name with data[0:8]
+2024-12-17 12:29:07,994 - multipart.multipart - DEBUG - [multipart.py:583] - Calling on_field_data with data[9:12]
+2024-12-17 12:29:07,995 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_field_end with no data
+2024-12-17 12:29:07,995 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_field_start with no data
+2024-12-17 12:29:07,995 - multipart.multipart - DEBUG - [multipart.py:583] - Calling on_field_name with data[13:21]
+2024-12-17 12:29:07,995 - multipart.multipart - DEBUG - [multipart.py:583] - Calling on_field_data with data[22:28]
+2024-12-17 12:29:07,995 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_field_end with no data
+2024-12-17 12:29:07,995 - multipart.multipart - DEBUG - [multipart.py:586] - Calling on_end with no data
+2024-12-17 12:29:20,004 - app.api.endpoints - ERROR - [endpoints.py:220] - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer
+2024-12-17 12:29:23,571 - app.api.endpoints - ERROR - [endpoints.py:220] - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer

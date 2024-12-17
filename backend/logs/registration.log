@@ -321,3 +321,55 @@ date
 2024-12-16 22:57:43,846 - ERROR - Error creating expense: fromisoformat: argument must be str
 2024-12-16 22:57:55,359 - INFO - Starting up the application
 2024-12-16 22:57:55,368 - INFO - Successfully connected to the database
+2024-12-17 12:25:24,049 - INFO - Starting up the application
+2024-12-17 12:25:24,054 - INFO - Successfully connected to the database
+2024-12-17 12:27:11,958 - ERROR - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer
+2024-12-17 12:27:40,513 - ERROR - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer
+2024-12-17 12:27:44,455 - ERROR - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer
+2024-12-17 12:27:49,399 - ERROR - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer
+2024-12-17 12:28:04,471 - INFO - Starting up the application
+2024-12-17 12:28:04,474 - INFO - Successfully connected to the database
+2024-12-17 12:28:46,029 - ERROR - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer
+2024-12-17 12:28:51,341 - ERROR - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer
+2024-12-17 12:29:20,004 - ERROR - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer
+2024-12-17 12:29:23,571 - ERROR - Error creating expense: 'str' object cannot be interpreted as an integer
+Traceback (most recent call last):
+  File "/home/srihari/Documents/Projects/App Dev/backend/app/api/endpoints.py", line 190, in create_expense
+    expense_date = datetime.fromisoformat(expense.date.replace('Z', '+00:00'))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'str' object cannot be interpreted as an integer

@@ -1,0 +1,93 @@
+graph TB
+    subgraph Frontend Components
+        subgraph UI Components
+            SCR[Screens]
+            WID[Widgets]
+            COMP[Common Components]
+        end
+
+        subgraph State Management
+            PROV[Provider]
+            STATE[App State]
+            NOTIF[Change Notifier]
+        end
+
+        subgraph Local Storage
+            PREFS[Shared Preferences]
+            SQLDB[SQLite Database]
+        end
+    end
+
+    subgraph Backend Services
+        subgraph API Layer
+            ROUTE[FastAPI Routes]
+            MID[Middleware]
+            VAL[Validators]
+        end
+
+        subgraph Business Logic
+            AUTH[Auth Service]
+            EXP[Expense Service]
+            ACH[Achievement Service]
+            AN[Analytics Service]
+        end
+
+        subgraph Data Access
+            REPO[Repositories]
+            MODEL[Models]
+            SCHEMA[Schemas]
+        end
+    end
+
+    subgraph Database Layer
+        subgraph Collections
+            USERS[Users Collection]
+            EXPENSES[Expenses Collection]
+            ACHIEVE[Achievements Collection]
+        end
+
+        subgraph Indexes
+            IDX1[User Index]
+            IDX2[Category Index]
+            IDX3[Date Index]
+        end
+    end
+
+    SCR --> WID
+    WID --> COMP
+    SCR --> PROV
+    PROV --> STATE
+    STATE --> NOTIF
+    PROV --> PREFS
+    PROV --> SQLDB
+
+    ROUTE --> MID
+    MID --> VAL
+    VAL --> AUTH
+    VAL --> EXP
+    VAL --> ACH
+    VAL --> AN
+
+    AUTH --> REPO
+    EXP --> REPO
+    ACH --> REPO
+    AN --> REPO
+
+    REPO --> MODEL
+    MODEL --> SCHEMA
+
+    SCHEMA --> USERS
+    SCHEMA --> EXPENSES
+    SCHEMA --> ACHIEVE
+
+    USERS --> IDX1
+    EXPENSES --> IDX2
+    EXPENSES --> IDX3
+
+    classDef frontend fill:#e3f2fd,stroke:#1565c0
+    classDef backend fill:#f3e5f5,stroke:#4a148c
+    classDef database fill:#e8f5e9,stroke:#1b5e20
+
+    class SCR,WID,COMP,PROV,STATE,NOTIF,PREFS,SQLDB frontend
+    class ROUTE,MID,VAL,AUTH,EXP,ACH,AN,REPO,MODEL,SCHEMA backend
+    class USERS,EXPENSES,ACHIEVE,IDX1,IDX2,IDX3 database

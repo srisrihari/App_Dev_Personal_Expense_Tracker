@@ -1,0 +1,58 @@
+graph TB
+    START((Start)) --> SPLASH[Splash Screen]
+    
+    SPLASH --> AUTH{Authenticated?}
+    
+    AUTH -->|No| LOGIN[Login Screen]
+    AUTH -->|Yes| DASH[Dashboard]
+    
+    LOGIN -->|Sign Up| REG[Registration]
+    LOGIN -->|Login| VALID{Validate}
+    REG --> VALID
+    
+    VALID -->|Failed| LOGIN
+    VALID -->|Success| DASH
+    
+    DASH --> NAV{Navigation}
+    
+    NAV -->|Add Expense| ADD[Add Expense Screen]
+    NAV -->|View History| HIST[Expense History]
+    NAV -->|View Analytics| ANAL[Analytics Screen]
+    NAV -->|View Profile| PROF[Profile Screen]
+    
+    ADD --> FORM[Expense Form]
+    FORM -->|Save| SAVE{Validate & Save}
+    SAVE -->|Success| ACH{Check Achievement}
+    SAVE -->|Failed| FORM
+    
+    ACH -->|Unlocked| NOTIF[Show Achievement]
+    ACH --> DASH
+    
+    HIST -->|Edit| EDIT[Edit Expense]
+    HIST -->|Delete| DEL{Confirm Delete}
+    
+    EDIT --> FORM
+    DEL -->|Confirmed| DASH
+    DEL -->|Cancelled| HIST
+    
+    ANAL --> CHART[Generate Charts]
+    CHART --> FILTER[Apply Filters]
+    FILTER --> CHART
+    
+    PROF --> SETTINGS[Settings]
+    PROF -->|Logout| LOGOUT{Confirm Logout}
+    
+    LOGOUT -->|Yes| LOGIN
+    LOGOUT -->|No| PROF
+    
+    classDef start fill:#b9f6ca,stroke:#00c853
+    classDef auth fill:#ffecb3,stroke:#ffa000
+    classDef screens fill:#e3f2fd,stroke:#1565c0
+    classDef actions fill:#f3e5f5,stroke:#4a148c
+    classDef decision fill:#fce4ec,stroke:#c2185b
+    
+    class START start
+    class LOGIN,REG,AUTH auth
+    class DASH,ADD,HIST,ANAL,PROF,FORM,EDIT,SETTINGS screens
+    class SAVE,ACH,DEL,LOGOUT decision
+    class NOTIF,CHART,FILTER actions

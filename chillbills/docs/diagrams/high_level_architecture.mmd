@@ -1,0 +1,44 @@
+graph TB
+    subgraph Client Layer
+        UI[User Interface]
+        LC[Local Cache]
+        ST[State Management]
+    end
+
+    subgraph Application Layer
+        API[API Gateway]
+        AUTH[Authentication Service]
+        EXP[Expense Service]
+        ACH[Achievement Service]
+        AN[Analytics Service]
+    end
+
+    subgraph Data Layer
+        DB[(MongoDB)]
+        CACHE[(Redis Cache)]
+    end
+
+    UI --> |HTTP/REST| API
+    UI --> LC
+    UI --> ST
+    
+    API --> AUTH
+    API --> EXP
+    API --> ACH
+    API --> AN
+    
+    AUTH --> DB
+    EXP --> DB
+    ACH --> DB
+    AN --> DB
+    
+    EXP --> CACHE
+    AN --> CACHE
+
+    classDef clientLayer fill:#e1f5fe,stroke:#01579b
+    classDef appLayer fill:#f3e5f5,stroke:#4a148c
+    classDef dataLayer fill:#e8f5e9,stroke:#1b5e20
+    
+    class UI,LC,ST clientLayer
+    class API,AUTH,EXP,ACH,AN appLayer
+    class DB,CACHE dataLayer
